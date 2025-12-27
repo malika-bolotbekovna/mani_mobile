@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import '../services/api_client.dart';
 import '../services/home_service.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final ApiClient? apiClient;
+
+  const HomeScreen({super.key, this.apiClient});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -66,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 8),
 
-              Center(child: Image.asset('assets/hedgehog.webp', height: 110)),
+              Center(child: Image.asset('assets/fox.webp', height: 110)),
 
               const SizedBox(height: 14),
 
@@ -287,7 +290,7 @@ class _BigCard extends StatelessWidget {
               radius: 22,
               backgroundColor: const Color(0xFFE9A0B2).withValues(alpha: 0.25),
               child: Image.asset(
-                'assets/hedgehog.webp',
+                'assets/fox.webp',
                 width: 26,
                 height: 26,
                 fit: BoxFit.contain,

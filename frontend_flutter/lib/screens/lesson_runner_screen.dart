@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_flutter/screens/translation_cards_screen.dart';
 import '../models/exercise.dart';
+import '../services/progress_service.dart';
 import 'lesson_choice_screen.dart';
 import 'lesson_input_screen.dart';
 import 'lesson_cards_screen.dart';
@@ -22,6 +24,7 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
   late final List<Exercise> choiceList;
   late final List<Exercise> inputList;
   late final List<Exercise> cardsList;
+  late final ProgressService progressService;
 
   int step = 0; // 0-choice → 1-input → 2-cards
 
@@ -29,27 +32,26 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
   void initState() {
     super.initState();
 
+    progressService = ProgressService();
+
     choiceList = widget.exercises
         .where((e) => e.type == 'choice')
         .take(4)
         .toList();
+
     inputList = widget.exercises
         .where((e) => e.type == 'input')
         .take(4)
         .toList();
+
     cardsList = widget.exercises
         .where((e) => e.type == 'cards')
         .take(4)
         .toList();
 
-    // если choice нет — начинаем с input
-    if (choiceList.isEmpty && inputList.isNotEmpty) {
-      step = 1;
-    }
-    // если нет ни choice, ни input — начинаем с cards
-    if (choiceList.isEmpty && inputList.isEmpty && cardsList.isNotEmpty) {
+    if (choiceList.isEmpty && inputList.isNotEmpty) step = 1;
+    if (choiceList.isEmpty && inputList.isEmpty && cardsList.isNotEmpty)
       step = 2;
-    }
   }
 
   void _nextBlock() {
@@ -65,21 +67,34 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
       return LessonChoiceScreen(
         lessonTitle: widget.lessonTitle,
         exercises: choiceList,
+        progressService: progressService,
         onFinished: _nextBlock,
       );
     }
 
     // 2️⃣ input
     if (step == 1 && inputList.isNotEmpty) {
-      return LessonInputScreen(exercises: inputList, onFinished: _nextBlock);
+      return LessonInputScreen(
+        exercises: inputList,
+        progressService: progressService,
+        onFinished: _nextBlock,
+      );
     }
 
     // 3️⃣ cards  ← ВОТ ТУТ ОНО
     if (step == 2 && cardsList.isNotEmpty) {
       return LessonCardsScreen(
         exercises: cardsList,
+        progressService: progressService,
         onFinished: () {
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => TranslationCardsScreen(
+                allCorrect: true,
+              ), // или result.allCorrect не используем
+            ),
+          );
         },
       );
     }

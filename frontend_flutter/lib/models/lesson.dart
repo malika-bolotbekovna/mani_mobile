@@ -24,7 +24,7 @@ class Lesson {
       orderNum: (json['order_num'] as num?)?.toInt() ?? 1,
       xpReward: (json['xp_reward'] as num?)?.toInt() ?? 10,
       courseId: (json['course'] as num?)?.toInt() ?? 0,
-      isCompleted: false,
+      isCompleted: (json['is_completed'] ?? false) as bool,
     );
   }
 }

@@ -85,8 +85,8 @@ class _LessonListScreenState extends State<LessonListScreen> {
                       : 'Урок ${l.orderNum}';
                   return InkWell(
                     borderRadius: BorderRadius.circular(18),
-                    onTap: () {
-                      Navigator.of(context).push(
+                    onTap: () async {
+                      await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => LessonStartScreen(
                             lessonId: l.id,
@@ -94,6 +94,8 @@ class _LessonListScreenState extends State<LessonListScreen> {
                           ),
                         ),
                       );
+
+                      _load(); // ← обновляем список уроков после возврата
                     },
                     child: _LessonCard(
                       title: title,

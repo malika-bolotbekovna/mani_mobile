@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import '../models/exercise.dart';
+import '../services/progress_service.dart';
 
 class LessonChoiceScreen extends StatefulWidget {
   final String lessonTitle;
   final List<Exercise> exercises;
   final int startIndex;
   final VoidCallback? onFinished;
+  final ProgressService progressService;
 
   const LessonChoiceScreen({
     super.key,
     required this.lessonTitle,
     required this.exercises,
+    required this.progressService,
     this.startIndex = 0,
     this.onFinished,
   });
@@ -28,6 +31,7 @@ class _LessonChoiceScreenState extends State<LessonChoiceScreen> {
   String? selected;
   bool checked = false;
   bool isCorrect = false;
+  bool sending = false;
 
   @override
   void initState() {
@@ -42,23 +46,32 @@ class _LessonChoiceScreenState extends State<LessonChoiceScreen> {
     setState(() => selected = v);
   }
 
-  void _check() {
-    if (selected == null) return;
+  Future<void> _check() async {
+    if (selected == null || checked || sending) return;
+
     final ok = selected == ex.correctAnswer;
+
     setState(() {
       checked = true;
       isCorrect = ok;
+      sending = true;
     });
+
+    try {
+      await widget.progressService.submitAttempt(
+        exerciseId: ex.id,
+        isCorrect: ok,
+      );
+
+      if (!mounted) return;
+    } finally {
+      if (mounted) setState(() => sending = false);
+    }
   }
 
   void _next() {
     if (index + 1 >= widget.exercises.length) {
-      if (widget.onFinished != null) {
-        widget.onFinished!();
-      } else {
-        Navigator.of(context).popUntil((r) => r.isFirst);
-      }
-
+      widget.onFinished?.call();
       return;
     }
     setState(() {
@@ -66,6 +79,7 @@ class _LessonChoiceScreenState extends State<LessonChoiceScreen> {
       selected = null;
       checked = false;
       isCorrect = false;
+      sending = false;
     });
   }
 
@@ -74,7 +88,6 @@ class _LessonChoiceScreenState extends State<LessonChoiceScreen> {
     final total = widget.exercises.length;
     final step = index + 1;
 
-    // гарантируем 4 варианта
     final opts = ex.options.take(4).toList();
 
     return Scaffold(
@@ -167,7 +180,7 @@ class _LessonChoiceScreenState extends State<LessonChoiceScreen> {
                   ),
                 ),
                 child: Text(
-                  checked ? 'Дальше' : 'Ответить',
+                  checked ? 'Дальше' : (sending ? 'Проверяем...' : 'Ответить'),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
@@ -205,15 +218,9 @@ class _OptionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     Color bg = Colors.white.withValues(alpha: 0.85);
 
-    if (selected && !checked) {
-      bg = const Color(0xFFF2D7DD); // лёгкая розовая подсветка как на скрине
-    }
-    if (isCorrectOption) {
-      bg = const Color(0xFFDFF3E3);
-    }
-    if (isWrongSelected) {
-      bg = const Color(0xFFF6DADA);
-    }
+    if (selected && !checked) bg = const Color(0xFFF2D7DD);
+    if (isCorrectOption) bg = const Color(0xFFDFF3E3);
+    if (isWrongSelected) bg = const Color(0xFFF6DADA);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),

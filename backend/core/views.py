@@ -75,19 +75,6 @@ class ProgressViewSet(
 
     @action(detail=False, methods=["post"], url_path="submit-attempt")
     def submit_attempt(self, request):
-        """
-        Ожидает:
-          {
-            "exercise_id": 123,
-            "is_correct": true
-          }
-
-        Логика:
-          - записывает попытку ExerciseAttempt
-          - обновляет Progress по уроку:
-              completed = выполнены все упражнения урока (есть попытка на каждое)
-              all_correct = последние попытки по всем упражнениям правильные
-        """
         s = SubmitAttemptSerializer(data=request.data)
         s.is_valid(raise_exception=True)
 

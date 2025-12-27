@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import '../models/exercise.dart';
+import '../services/progress_service.dart';
 
 class LessonCardsScreen extends StatefulWidget {
   final List<Exercise> exercises;
   final VoidCallback? onFinished;
+  final ProgressService progressService;
 
   const LessonCardsScreen({
     super.key,
     required this.exercises,
+    required this.progressService,
     this.onFinished,
   });
 
@@ -22,15 +25,33 @@ class _LessonCardsScreenState extends State<LessonCardsScreen> {
   int index = 0;
   String? selected;
   bool checked = false;
+  bool isCorrect = false;
+  bool sending = false;
 
   Exercise get ex => widget.exercises[index];
 
-  void _check(String v) {
-    if (checked) return;
+  Future<void> _check(String v) async {
+    if (checked || sending) return;
+
+    final ok = v == ex.correctAnswer;
+
     setState(() {
       selected = v;
       checked = true;
+      isCorrect = ok;
+      sending = true;
     });
+
+    try {
+      await widget.progressService.submitAttempt(
+        exerciseId: ex.id,
+        isCorrect: ok,
+      );
+
+      if (!mounted) return;
+    } finally {
+      if (mounted) setState(() => sending = false);
+    }
   }
 
   void _next() {
@@ -42,6 +63,8 @@ class _LessonCardsScreenState extends State<LessonCardsScreen> {
       index++;
       selected = null;
       checked = false;
+      isCorrect = false;
+      sending = false;
     });
   }
 
@@ -76,13 +99,12 @@ class _LessonCardsScreenState extends State<LessonCardsScreen> {
               itemBuilder: (context, i) {
                 final url = ex.options[i];
                 final isSelected = selected == url;
-                final isCorrect = checked && url == ex.correctAnswer;
-                final isWrong =
-                    checked && isSelected && url != ex.correctAnswer;
+                final correct = checked && url == ex.correctAnswer;
+                final wrong = checked && isSelected && url != ex.correctAnswer;
 
                 Color border = Colors.transparent;
-                if (isCorrect) border = Colors.green;
-                if (isWrong) border = Colors.red;
+                if (correct) border = Colors.green;
+                if (wrong) border = Colors.red;
 
                 return GestureDetector(
                   onTap: () => _check(url),
@@ -114,9 +136,9 @@ class _LessonCardsScreenState extends State<LessonCardsScreen> {
                     borderRadius: BorderRadius.circular(18),
                   ),
                 ),
-                child: const Text(
-                  'Дальше',
-                  style: TextStyle(
+                child: Text(
+                  sending ? 'Проверяем...' : 'Дальше',
+                  style: const TextStyle(
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
                   ),

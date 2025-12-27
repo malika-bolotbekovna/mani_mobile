@@ -2,7 +2,7 @@ import '../models/course.dart';
 import 'api_client.dart';
 
 class CourseService {
-  CourseService({ApiClient? api}) : _api = api ?? ApiClient();
+  CourseService({ApiClient? api}) : _api = api ?? ApiClient.instance;
   final ApiClient _api;
 
   Future<List<Course>> getCoursesByTopic(int topicId) async {

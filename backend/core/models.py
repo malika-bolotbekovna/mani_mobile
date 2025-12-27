@@ -40,7 +40,7 @@ class Exercise(models.Model):
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name="exercises")
     type = models.CharField(max_length=10, choices=TYPE_CHOICES)
     question = models.TextField()
-    correct_answer = models.CharField(max_length=200)
+    correct_answer = models.CharField(max_length=1000)
 
     options_json = models.TextField(
         blank=True,

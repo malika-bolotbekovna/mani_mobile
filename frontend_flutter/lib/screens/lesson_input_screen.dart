@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import '../models/exercise.dart';
+import '../services/progress_service.dart';
 
 class LessonInputScreen extends StatefulWidget {
-  final List<Exercise> exercises; // только type=input
+  final List<Exercise> exercises;
   final int startIndex;
   final VoidCallback? onFinished;
+  final ProgressService progressService;
 
   const LessonInputScreen({
     super.key,
     required this.exercises,
+    required this.progressService,
     this.startIndex = 0,
     this.onFinished,
   });
@@ -27,6 +30,7 @@ class _LessonInputScreenState extends State<LessonInputScreen> {
 
   bool checked = false;
   bool isCorrect = false;
+  bool sending = false;
 
   @override
   void initState() {
@@ -44,24 +48,34 @@ class _LessonInputScreenState extends State<LessonInputScreen> {
 
   String _norm(String s) => s.trim().toLowerCase();
 
-  void _check() {
+  Future<void> _check() async {
+    if (checked || sending) return;
+
     final user = _norm(ctrl.text);
     final right = _norm(ex.correctAnswer);
+    final ok = user.isNotEmpty && user == right;
 
     setState(() {
       checked = true;
-      isCorrect = user.isNotEmpty && user == right;
+      isCorrect = ok;
+      sending = true;
     });
+
+    try {
+      await widget.progressService.submitAttempt(
+        exerciseId: ex.id,
+        isCorrect: ok,
+      );
+
+      if (!mounted) return;
+    } finally {
+      if (mounted) setState(() => sending = false);
+    }
   }
 
   void _next() {
     if (index + 1 >= widget.exercises.length) {
-      if (widget.onFinished != null) {
-        widget.onFinished!();
-      } else {
-        Navigator.of(context).popUntil((r) => r.isFirst);
-      }
-
+      widget.onFinished?.call();
       return;
     }
     setState(() {
@@ -69,6 +83,7 @@ class _LessonInputScreenState extends State<LessonInputScreen> {
       ctrl.clear();
       checked = false;
       isCorrect = false;
+      sending = false;
     });
   }
 
@@ -76,6 +91,7 @@ class _LessonInputScreenState extends State<LessonInputScreen> {
   Widget build(BuildContext context) {
     final total = widget.exercises.length;
     final step = index + 1;
+
     return Scaffold(
       backgroundColor: bg,
       appBar: AppBar(
@@ -193,7 +209,7 @@ class _LessonInputScreenState extends State<LessonInputScreen> {
                   ),
                 ),
                 child: Text(
-                  checked ? 'Дальше' : 'Ответить',
+                  checked ? 'Дальше' : (sending ? 'Проверяем...' : 'Ответить'),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,

@@ -57,7 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         password: passwordCtrl.text,
       );
 
-      final me = await auth.getMe(tokens.access);
+      final me = await auth.getMe();
       if (!mounted) return;
 
       Navigator.of(context).pushReplacement(

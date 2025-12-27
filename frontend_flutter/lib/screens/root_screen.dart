@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
+import '../services/api_client.dart';
 
 import 'home_screen.dart';
 import 'course_map_screen.dart';
@@ -17,21 +18,26 @@ class RootScreen extends StatefulWidget {
 }
 
 class _RootScreenState extends State<RootScreen> {
-  int index = 1; // стартуем с "Топики" (как у тебя было)
+  int index = 1;
 
   static const bg = Color(0xFFF6EEDF);
   static const accent = Color(0xFFE9A0B2);
 
+  late final ApiClient apiClient;
   late final List<Widget> pages;
 
   @override
   void initState() {
     super.initState();
+
+    apiClient = ApiClient.instance;
+    apiClient.setToken(widget.access);
+
     pages = [
-      const HomeScreen(), // Дом
-      const CourseMapScreen(), // Топики
-      const VocabularyScreen(), // Словарь
-      ProfileScreen(me: widget.me, access: widget.access), // Профиль
+      const HomeScreen(),
+      const CourseMapScreen(),
+      const VocabularyScreen(),
+      ProfileScreen(me: widget.me, access: widget.access),
     ];
   }
 

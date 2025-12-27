@@ -42,7 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         throw Exception('Сессия закончилась. Войдите заново.');
       }
 
-      final updated = await auth.getMe(currentAccess);
+      final updated = await auth.getMe();
 
       setState(() {
         me = updated;
@@ -87,7 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 12),
 
-              Center(child: Image.asset('assets/hedgehog.webp', height: 120)),
+              Center(child: Image.asset('assets/fox.webp', height: 120)),
 
               const SizedBox(height: 14),
 

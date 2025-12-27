@@ -19,19 +19,26 @@ class CourseSerializer(serializers.ModelSerializer):
 
 class LessonSerializer(serializers.ModelSerializer):
     is_completed = serializers.SerializerMethodField()
+
     class Meta:
         model = Lesson
-        fields = "__all__"
+        fields = (
+            "id",
+            "course",
+            "title",
+            "order_num",
+            "xp_reward",
+            "is_completed",
+            # добавь сюда остальные поля Lesson, которые тебе реально нужны
+        )
 
     def get_is_completed(self, obj):
         request = self.context.get("request")
         user = getattr(request, "user", None)
-
         if not user or not user.is_authenticated:
             return False
-
-        # правило “завершено”: есть запись прогресса (можешь поменять логику)
         return Progress.objects.filter(user=user, lesson=obj, completed=True).exists()
+
 
     
 class ExerciseSerializer(serializers.ModelSerializer):

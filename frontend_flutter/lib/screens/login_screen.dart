@@ -34,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
         email: emailCtrl.text,
         password: passwordCtrl.text,
       );
-      final me = await auth.getMe(tokens.access);
+      final me = await auth.getMe();
 
       Navigator.pushReplacement(
         context,
@@ -83,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               Center(
                 child: Image.asset(
-                  'assets/hedgehog.webp',
+                  'assets/fox.webp',
                   height: 140,
                   fit: BoxFit.contain,
                 ),

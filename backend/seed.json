@@ -2,5 +2,5 @@
   {"model": "core.course", "pk": 1, "fields": {"title": "Starter English", "level": "A1"}},
   {"model": "core.lesson", "pk": 1, "fields": {"course": 1, "title": "Greetings", "order_num": 1, "xp_reward": 10}},
   {"model": "core.exercise", "pk": 1, "fields": {"lesson": 1, "type": "choice", "question": "How do you say 'Привет'?", "correct_answer": "Hello", "options_json": "[\"Hello\", \"Bye\"]"}},
-  {"model": "core.vocabulary", "pk": 1, "fields": {"word": "hello", "translation": "привет", "example": "Hello, hedgehog!"}}
+  {"model": "core.vocabulary", "pk": 1, "fields": {"word": "hello", "translation": "привет", "example": "Hello, fox!"}}
 ]

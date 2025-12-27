@@ -32,7 +32,7 @@ class _BootScreenState extends State<BootScreen> {
     }
 
     try {
-      final me = await auth.getMe(access);
+      final me = await auth.getMe();
       if (!mounted) return;
 
       Navigator.pushReplacement(
